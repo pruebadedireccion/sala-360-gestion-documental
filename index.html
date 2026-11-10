@@ -582,6 +582,24 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
             font-style: normal;
             font-weight: 500;
         }
+        #info-panel .story-note {
+            margin: 0 0 14px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            background: rgba(114, 221, 245, 0.08);
+            color: #eaf8ff;
+            font-size: 0.81rem;
+            line-height: 1.48;
+        }
+        #info-panel .story-note span {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--station-color);
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+        }
+        #info-panel .story-note p { margin: 0; }
         #info-panel .detail { color: #c5d3df; font-size: 0.84rem; }
         #info-panel .close-btn {
             border-color: rgba(255, 255, 255, 0.25);
@@ -888,6 +906,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         <div class="station-number" id="info-number">Estación 1</div>
         <h2 id="info-title">Título</h2>
         <div class="phrase" id="info-phrase">Frase</div>
+        <div class="story-note">
+            <span>Impacto 2038</span>
+            <p id="info-story">Relato de la estación</p>
+        </div>
         <div class="detail" id="info-detail">Detalle</div>
     </div>
 
@@ -959,6 +981,7 @@ const STATIONS = [
         name: 'Consultas y Préstamos',
         labelLines: ['Consultas y', 'Préstamos'],
         phrase: 'El acceso deja de ser trámite.',
+        story: 'El ciudadano consulta, descarga y recibe acompañamiento sin repetir trámites.',
         detail: 'Los ciudadanos acceden a sus documentos de forma inmediata a través de portales inteligentes. Las fichas de consulta se generan automáticamente y el sistema anticipa necesidades.',
         color: CONFIG.colors.station1,
         position: new THREE.Vector3(0, 0, 7.8),
@@ -972,6 +995,7 @@ const STATIONS = [
         name: 'Conformación electrónica',
         labelLines: ['Conformación', 'electrónica'],
         phrase: 'El papel entra, el dato sale.',
+        story: 'Los documentos dispersos se integran en un expediente electrónico completo y confiable.',
         detail: 'Cada documento físico se transforma en datos estructurados en segundos. El reconocimiento óptico inteligente extrae información clave y alimenta los sistemas de gestión sin intervención manual.',
         color: CONFIG.colors.station2,
         position: new THREE.Vector3(7.42, 0, 2.41),
@@ -985,6 +1009,7 @@ const STATIONS = [
         name: 'Radicación con IA',
         labelLines: ['Radicación', 'con IA'],
         phrase: 'El sistema organiza solo.',
+        story: 'La IA clasifica y prioriza; los equipos humanos dedican su tiempo a decidir mejor.',
         detail: 'La inteligencia artificial clasifica, asigna y enruta cada documento hacia el área correcta. Las reglas de negocio se aprenden y optimizan continuamente, eliminando cuellos de botella.',
         color: CONFIG.colors.station3,
         position: new THREE.Vector3(4.59, 0, -6.31),
@@ -998,6 +1023,7 @@ const STATIONS = [
         name: 'Georreferenciación SGDEA',
         labelLines: ['Georreferenciación', 'SGDEA'],
         phrase: 'El documento sabe dónde está.',
+        story: 'Cada expediente conserva su contexto físico y territorial dentro del SGDEA.',
         detail: 'Cada registro está vinculado a su contexto geográfico y administrativo. Los mapas interactivos muestran la trazabilidad física y digital de cada expediente en tiempo real.',
         color: CONFIG.colors.station4,
         position: new THREE.Vector3(-4.59, 0, -6.31),
@@ -1011,6 +1037,7 @@ const STATIONS = [
         name: 'Custodia (Física – Georreferenciación)',
         labelLines: ['Custodia', '(Física –', 'Georreferenciación)'],
         phrase: 'La información permanece viva y protegida.',
+        story: 'La custodia física y digital protege la memoria institucional y garantiza trazabilidad.',
         detail: 'Las cápsulas de custodia digital garantizan la preservación a largo plazo. Múltiples capas de seguridad, redundancia y verificación de integridad protegen el patrimonio documental.',
         color: CONFIG.colors.station5,
         position: new THREE.Vector3(-7.42, 0, 2.41),
@@ -1031,6 +1058,7 @@ let raycaster, mouse;
 let stationMeshes = [];
 let coreGroup, portalGroup, observationGroup;
 let particles, particleGeo, particleMat;
+let officeAnimations = [];
 let animationId;
 let currentStation = null;
 let isImmersive = false;
@@ -1248,8 +1276,149 @@ function buildFloor() {
     scene.add(seams);
 }
 
+// Panel holográfico de oficina: datos flotantes sin una pantalla física
+function createOfficeHologram(index, color) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 320;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(23, 75, 104, 0.16)';
+    roundRect(ctx, 8, 8, 496, 304, 18);
+    ctx.fill();
+    ctx.shadowColor = cssColor(color);
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = cssColor(color);
+    ctx.globalAlpha = 0.92;
+    ctx.lineWidth = 5;
+    roundRect(ctx, 8, 8, 496, 304, 18);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = cssColor(color);
+    roundRect(ctx, 30, 30, 210, 18, 9);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.52)';
+    roundRect(ctx, 30, 66, 110, 7, 4);
+    ctx.fill();
+
+    if (index % 3 === 0) {
+        const heights = [58, 96, 74, 132, 108, 154];
+        heights.forEach((height, i) => {
+            ctx.fillStyle = i === heights.length - 1 ? cssColor(color) : 'rgba(114,221,245,0.34)';
+            roundRect(ctx, 38 + i * 48, 262 - height, 24, height, 5);
+            ctx.fill();
+        });
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(40, 246);
+        ctx.lineTo(105, 214);
+        ctx.lineTo(172, 230);
+        ctx.lineTo(245, 188);
+        ctx.lineTo(326, 170);
+        ctx.stroke();
+    } else if (index % 3 === 1) {
+        for (let i = 0; i < 5; i++) {
+            ctx.fillStyle = i === 0 ? 'rgba(114,221,245,0.50)' : 'rgba(255,255,255,0.14)';
+            roundRect(ctx, 30, 108 + i * 34, 300 - i * 22, 20, 5);
+            ctx.fill();
+        }
+        ctx.fillStyle = cssColor(color);
+        ctx.beginPath();
+        ctx.arc(406, 176, 60, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#10233f';
+        ctx.font = '700 32px Trebuchet MS, Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('SGDEA', 406, 177);
+    } else {
+        ctx.strokeStyle = 'rgba(114,221,245,0.42)';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(40 + i * 88, 104);
+            ctx.bezierCurveTo(90 + i * 88, 142, 26 + i * 88, 218, 98 + i * 88, 266);
+            ctx.stroke();
+        }
+        ctx.fillStyle = cssColor(color);
+        [[92, 142], [186, 208], [282, 168], [380, 233], [456, 126]].forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.arc(x, y, 9, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.42, 0.88),
+        new THREE.MeshBasicMaterial({
+            map: canvasTexture(canvas),
+            transparent: true,
+            opacity: 0.95,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        })
+    );
+    panel.renderOrder = 2;
+    return panel;
+}
+
+// Persona estilizada: sin rostro detallado para evitar el efecto de maniquí extraño
+function createOfficeWorker(color, skinColor) {
+    const worker = new THREE.Group();
+    const clothing = new THREE.MeshStandardMaterial({ color, roughness: 0.72 });
+    const skin = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.82 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x273846, roughness: 0.65 });
+
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.40, 4, 8), clothing);
+    torso.position.y = 1.04;
+    torso.castShadow = true;
+    worker.add(torso);
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 10), skin);
+    head.position.y = 1.56;
+    head.castShadow = true;
+    worker.add(head);
+    const hair = new THREE.Mesh(
+        new THREE.SphereGeometry(0.165, 14, 8, 0, Math.PI * 2, 0, Math.PI * 0.48),
+        dark
+    );
+    hair.position.y = 1.60;
+    worker.add(hair);
+
+    [-0.13, 0.13].forEach(x => {
+        const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.068, 0.50, 3, 6), dark);
+        leg.position.set(x, 0.42, 0);
+        worker.add(leg);
+    });
+
+    const armPivots = [];
+    [-1, 1].forEach(side => {
+        const pivot = new THREE.Group();
+        pivot.position.set(side * 0.255, 1.30, -0.015);
+        const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.46, 3, 6), clothing);
+        arm.position.y = -0.26;
+        pivot.add(arm);
+        const hand = new THREE.Mesh(
+            new THREE.SphereGeometry(0.078, 8, 6),
+            emissiveMaterial(0x8beaff, 1.15, 0.92)
+        );
+        hand.position.y = -0.54;
+        pivot.add(hand);
+        pivot.rotation.x = 1.15;
+        pivot.rotation.z = side * -0.08;
+        worker.add(pivot);
+        armPivots.push(pivot);
+    });
+
+    return { worker, head, arms: armPivots };
+}
+
 // Oficina real detrás de los muros de vidrio: da escala y contexto a la sala
 function buildOfficeEnvironment() {
+    officeAnimations = [];
     const office = new THREE.Group();
     const white = new THREE.MeshStandardMaterial({ color: 0xe9eef2, roughness: 0.55 });
     const frame = new THREE.MeshStandardMaterial({ color: 0x4a5b68, roughness: 0.38, metalness: 0.45 });
@@ -1283,27 +1452,86 @@ function buildOfficeEnvironment() {
     addBox(office, [48.2, 0.14, 0.18], [0, 9.68, -16.5], frame, false);
     addBox(office, [48, 0.08, 0.12], [0, 2.7, -16.45], frame, false);
 
-    // Puestos de trabajo simplificados detrás del vidrio
+    // Puestos de trabajo con personas y paneles holográficos sin contacto
     const deskMat = new THREE.MeshStandardMaterial({ color: 0x657580, roughness: 0.55 });
-    const screenMat = new THREE.MeshStandardMaterial({
-        color: 0x294555,
-        emissive: 0x3d6d84,
-        emissiveIntensity: 0.24,
-        roughness: 0.3
-    });
-    for (let x = -20; x <= 20; x += 5) {
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x2f4354, roughness: 0.66 });
+    const shirtColors = [0x315a78, 0x53667d, 0x2f6e72, 0x5b4b76, 0x475b6e, 0x3e6d62, 0x5a546d];
+    const skinColors = [0xc99778, 0x8c5f48, 0xd8aa85, 0xa87558, 0x6e4b37, 0xba8564];
+    let workerIndex = 0;
+
+    [-20, -15, -10, -5, 0, 5, 10, 15, 20].forEach((x, deskIndex) => {
         addBox(office, [3.1, 0.12, 1.25], [x, 0.92, -19.3], deskMat, false);
         addBox(office, [0.10, 0.86, 0.10], [x - 1.25, 0.45, -19.3], frame, false);
         addBox(office, [0.10, 0.86, 0.10], [x + 1.25, 0.45, -19.3], frame, false);
-        addBox(office, [1.05, 0.66, 0.08], [x, 1.52, -19.65], screenMat, false);
-        addBox(office, [0.09, 0.50, 0.09], [x, 1.14, -19.65], frame, false);
-        addBox(office, [0.72, 0.85, 0.18], [x + 1.0, 0.65, -18.1], frame, false);
-    }
+        addBox(office, [3.05, 0.035, 0.055], [x, 1.01, -18.69], emissiveMaterial(0x66dcf5, 0.42, 0.5), false);
 
-    // Columnas y luminarias lineales del techo abierto
+        const hasWorker = deskIndex !== 1 && deskIndex !== 7;
+        if (!hasWorker) return;
+
+        addBox(office, [0.66, 0.08, 0.60], [x, 0.58, -17.95], chairMat, false);
+        addBox(office, [0.64, 0.72, 0.10], [x, 0.95, -17.60], chairMat, false);
+
+        const { worker, head, arms } = createOfficeWorker(
+            shirtColors[workerIndex % shirtColors.length],
+            skinColors[workerIndex % skinColors.length]
+        );
+        worker.position.set(x, 0, -18.05);
+        office.add(worker);
+
+        const panelColor = [0x68dcf5, 0x8ee9d6, 0x9eb9ff][workerIndex % 3];
+        const panel = createOfficeHologram(workerIndex, panelColor);
+        panel.position.set(x, 2.02, -19.58);
+        panel.rotation.y = (workerIndex % 2 ? 1 : -1) * 0.06;
+        office.add(panel);
+
+        const projectorRing = new THREE.Mesh(
+            new THREE.RingGeometry(0.20, 0.29, 32),
+            new THREE.MeshBasicMaterial({
+                color: panelColor,
+                transparent: true,
+                opacity: 0.58,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            })
+        );
+        projectorRing.rotation.x = -Math.PI / 2;
+        projectorRing.position.set(x, 1.018, -19.28);
+        office.add(projectorRing);
+
+        const projectionCone = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.43, 0.055, 0.94, 18, 1, true),
+            new THREE.MeshBasicMaterial({
+                color: panelColor,
+                transparent: true,
+                opacity: 0.045,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            })
+        );
+        projectionCone.position.set(x, 1.52, -19.32);
+        office.add(projectionCone);
+
+        officeAnimations.push({
+            panel,
+            head,
+            leftArm: arms[0],
+            rightArm: arms[1],
+            phase: workerIndex * 1.41,
+            baseY: 2.02
+        });
+        workerIndex++;
+    });
+
+    // Columnas terminadas: basa, fuste, capitel y acento vertical
     [-20, 20].forEach(x => {
-        addBox(office, [1.0, 7.2, 1.0], [x, 3.6, -8], white);
-        addBox(office, [0.85, 7.2, 0.85], [x * 1.08, 3.6, 8], white);
+        [[x, -8, 1.0], [x * 1.08, 8, 0.85]].forEach(([cx, cz, width]) => {
+            addBox(office, [width, 7.2, width], [cx, 3.6, cz], white);
+            addBox(office, [width * 1.42, 0.22, width * 1.42], [cx, 0.11, cz], frame, false);
+            addBox(office, [width * 1.32, 0.18, width * 1.32], [cx, 7.11, cz], white, false);
+            addBox(office, [0.035, 6.6, 0.04], [cx, 3.7, cz + width / 2 + 0.01], emissiveMaterial(0x9beaff, 0.7, 0.55), false);
+        });
     });
     const lightMat = emissiveMaterial(0xe9fbff, 1.7);
     [-12, 0, 12].forEach(x => {
@@ -1312,6 +1540,34 @@ function buildOfficeEnvironment() {
         });
     });
     addBox(office, [48, 0.24, 0.34], [0, 7.0, -15.8], frame, false);
+
+    // Identidad discreta en el muro profundo de la oficina
+    const wallSignCanvas = document.createElement('canvas');
+    wallSignCanvas.width = 1024;
+    wallSignCanvas.height = 256;
+    const wallCtx = wallSignCanvas.getContext('2d');
+    wallCtx.fillStyle = 'rgba(255,255,255,0.96)';
+    wallCtx.font = '700 58px Trebuchet MS, Arial';
+    wallCtx.textAlign = 'center';
+    wallCtx.textBaseline = 'middle';
+    wallCtx.fillText('GESTIÓN DOCUMENTAL', 512, 94);
+    wallCtx.fillStyle = '#6ccfe7';
+    wallCtx.fillRect(372, 143, 280, 4);
+    wallCtx.fillStyle = 'rgba(255,255,255,0.72)';
+    wallCtx.font = '500 25px Trebuchet MS, Arial';
+    wallCtx.fillText('BOGOTÁ · 2038', 512, 190);
+    const wallSign = new THREE.Mesh(
+        new THREE.PlaneGeometry(11.0, 2.75),
+        new THREE.MeshBasicMaterial({ map: canvasTexture(wallSignCanvas), transparent: true, side: THREE.DoubleSide })
+    );
+    wallSign.position.set(0, 5.35, -22.78);
+    office.add(wallSign);
+
+    [-23.1, 23.1].forEach(x => {
+        const officePlant = createPlant(0.72);
+        officePlant.position.set(x, 0, -18.7);
+        office.add(officePlant);
+    });
 
     scene.add(office);
 }
@@ -2426,6 +2682,7 @@ function showInfoPanel(stationId) {
     document.getElementById('info-number').textContent = 'Estación ' + st.id;
     document.getElementById('info-title').textContent = st.name;
     document.getElementById('info-phrase').textContent = st.phrase;
+    document.getElementById('info-story').textContent = st.story;
     document.getElementById('info-detail').textContent = st.detail;
     document.getElementById('info-panel').style.setProperty('--station-color', cssColor(st.color));
     document.getElementById('info-panel').classList.add('visible');
@@ -3174,6 +3431,18 @@ function animate() {
         if (st.ring) st.ring.material.opacity = 0.28 + Math.sin(time * 1.4 + idx) * 0.08;
         if (st.light) st.light.intensity = 2.15 + Math.sin(time * 1.3 + idx) * 0.20;
     });
+
+    // Oficina viva: gestos pausados sobre paneles holográficos
+    if (!REDUCED_MOTION) {
+        officeAnimations.forEach(actor => {
+            const t = time * 1.05 + actor.phase;
+            actor.head.rotation.y = Math.sin(t * 0.62) * 0.11;
+            actor.leftArm.rotation.x = 1.08 + Math.sin(t * 0.76) * 0.10;
+            actor.rightArm.rotation.x = 1.22 + Math.sin(t * 0.69 + 1.2) * 0.14;
+            actor.panel.position.y = actor.baseY + Math.sin(t * 0.55) * 0.035;
+            actor.panel.material.opacity = 0.78 + Math.sin(t * 0.82) * 0.07;
+        });
+    }
 
     // Partículas globales
     if (particleGeo && !REDUCED_MOTION) {
