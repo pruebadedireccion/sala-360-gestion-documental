@@ -969,6 +969,7 @@ const CONFIG = {
     cameraSpeed: 0.055,
     rotationSpeed: 0.06,
     tourDuration: 12, // segundos de contemplación por estación
+    invert360Vertical: true, // corrige el eje vertical de gestos y sensores en 360°
     event: {
         headline: '100 AÑOS',
         entity: 'SECRETARÍA DE HACIENDA DISTRITAL DE BOGOTÁ'
@@ -2861,7 +2862,8 @@ function update360Camera(delta) {
     if (useDeviceOrientation && orientationReferenceSet) {
         orientationSmooth.slerp(orientationTarget, blend);
         orientationForward.set(0, 0, -1).applyQuaternion(orientationSmooth);
-        orientationForward.y = THREE.MathUtils.clamp(orientationForward.y, -0.85, 0.85);
+        const verticalDirection = CONFIG.invert360Vertical ? -1 : 1;
+        orientationForward.y = THREE.MathUtils.clamp(orientationForward.y * verticalDirection, -0.85, 0.85);
         orientationForward.normalize();
         cameraLookAt.copy(view360Position).add(orientationForward);
         camera.lookAt(cameraLookAt);
@@ -3096,7 +3098,8 @@ function onMouseMove(e) {
                 update360MotionButton();
             }
             target360Yaw -= dx * 0.005;
-            target360Pitch = THREE.MathUtils.clamp(target360Pitch + dy * 0.005, -0.65, 0.65);
+            const verticalDirection = CONFIG.invert360Vertical ? -1 : 1;
+            target360Pitch = THREE.MathUtils.clamp(target360Pitch + verticalDirection * dy * 0.005, -0.65, 0.65);
         } else {
             targetYaw -= dx * 0.005;
             targetPitch += dy * 0.005;
@@ -3172,7 +3175,8 @@ function onTouchMove(e) {
                 update360MotionButton();
             }
             target360Yaw -= dx * 0.006;
-            target360Pitch = THREE.MathUtils.clamp(target360Pitch + dy * 0.006, -0.65, 0.65);
+            const verticalDirection = CONFIG.invert360Vertical ? -1 : 1;
+            target360Pitch = THREE.MathUtils.clamp(target360Pitch + verticalDirection * dy * 0.006, -0.65, 0.65);
         } else {
             targetYaw -= dx * 0.006;
             targetPitch += dy * 0.006;

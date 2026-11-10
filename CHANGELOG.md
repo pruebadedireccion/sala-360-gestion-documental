@@ -31,3 +31,4 @@ Todos los cambios relevantes de este proyecto se documentan en este archivo.
 - Simplificación del nombre de la estación Custodia.
 - Eliminación de códigos QR decorativos dentro de la escena.
 - Contraste y legibilidad de los paneles holográficos.
+- Sentido vertical de los gestos y sensores en el modo 360°.
