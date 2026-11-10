@@ -470,6 +470,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
             color: #ffffff;
         }
         .btn.muted { color: #ffd0c7; border-color: rgba(255, 130, 56, 0.55); }
+        .btn:disabled { cursor: wait; opacity: 0.7; }
 
         /* Navegación inferior inspirada en la señalización de la sala */
         #sidebar {
@@ -870,7 +871,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     </div>
 
     <div id="top-controls">
-        <button id="btn-sound" class="btn">Activar Sonido</button>
+        <button id="btn-sound" class="btn" title="Música: Future Design — penguinmusic (Pixabay). Activar o desactivar">Activar Música</button>
         <button id="btn-immersive" class="btn">Modo Inmersivo</button>
         <button id="btn-reset" class="btn">Vista General</button>
     </div>
@@ -1025,9 +1026,13 @@ let animationId;
 let currentStation = null;
 let isImmersive = false;
 let audioCtx = null;
+let musicBuffer = null;
+let musicSource = null;
+let musicGain = null;
+let musicLoading = false;
 let soundEnabled = false;
-let stationSounds = {};
-let ambientNodes = {};
+const MUSIC_SOURCE = 'audio/future-design.mp3';
+const MUSIC_VOLUME = 0.32;
 
 // Estado del recorrido guiado
 let tourActive = false;
@@ -1063,7 +1068,6 @@ const orientationForward = new THREE.Vector3();
 // Cámara suave
 let cameraLookAt = new THREE.Vector3(0, 1.2, 0);
 let currentLookAt = new THREE.Vector3(0, 1.2, 0);
-let lastSoundUpdate = 0;
 let hoverDirty = false;
 
 // Controles
@@ -2676,7 +2680,6 @@ function selectStation(id, fromTour = false) {
 
     showInfoPanel(id);
     updateUI();
-    updateStationSoundVolumes();
 }
 
 function deselectStation() {
@@ -2695,7 +2698,6 @@ function deselectStation() {
     }
     hideInfoPanel();
     updateUI();
-    updateStationSoundVolumes();
 }
 
 // ==========================================
@@ -3029,299 +3031,96 @@ function toggleImmersive() {
 }
 
 // ==========================================
-// WEB AUDIO API — SONIDO PROCEDURAL
+// MÚSICA DE FONDO — FUTURE DESIGN (PENGUINMUSIC)
 // ==========================================
-function initAudio() {
-    if (audioCtx) return;
+function updateMusicButton() {
+    const button = document.getElementById('btn-sound');
+    if (musicLoading) {
+        button.textContent = 'Cargando música…';
+        button.disabled = true;
+        button.classList.remove('active', 'muted');
+        return;
+    }
+    button.disabled = false;
+    button.textContent = soundEnabled ? 'Desactivar Música' : 'Activar Música';
+    button.classList.toggle('active', soundEnabled);
+    button.classList.toggle('muted', !soundEnabled);
+    button.setAttribute('aria-pressed', String(soundEnabled));
+}
+
+function setMusicGain(value, duration = 0.8) {
+    if (!audioCtx || !musicGain) return;
+    const now = audioCtx.currentTime;
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+    musicGain.gain.linearRampToValueAtTime(value, now + duration);
+}
+
+function startMusicPlayback() {
+    if (!audioCtx || !musicBuffer) return;
+    if (!musicSource) {
+        musicSource = audioCtx.createBufferSource();
+        musicSource.buffer = musicBuffer;
+        musicSource.loop = true;
+        musicGain = audioCtx.createGain();
+        musicGain.gain.value = 0;
+        musicSource.connect(musicGain);
+        musicGain.connect(audioCtx.destination);
+        musicSource.start();
+    }
+    soundEnabled = true;
+    updateMusicButton();
+    setMusicGain(MUSIC_VOLUME, 1.4);
+}
+
+async function initAudio() {
+    if (audioCtx && musicBuffer) {
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        startMusicPlayback();
+        return;
+    }
+    if (musicLoading) return;
+    musicLoading = true;
+    updateMusicButton();
+
     try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContext();
-        audioCtx.resume().catch(() => console.warn('El audio se activará con la siguiente interacción.'));
-        soundEnabled = true;
-        document.getElementById('btn-sound').textContent = 'Desactivar Sonido';
-        document.getElementById('btn-sound').classList.add('active');
-
-        buildAmbientSound();
-        buildStationSounds();
-    } catch (e) {
-        console.warn('Web Audio API no soportada');
+        await audioCtx.resume();
+        const response = await fetch(MUSIC_SOURCE);
+        if (!response.ok) throw new Error('No se pudo cargar la música');
+        const data = await response.arrayBuffer();
+        musicBuffer = await audioCtx.decodeAudioData(data);
+        musicLoading = false;
+        startMusicPlayback();
+    } catch (error) {
+        musicLoading = false;
+        soundEnabled = false;
+        updateMusicButton();
+        const button = document.getElementById('btn-sound');
+        button.title = 'La música no pudo cargarse. Verifica el archivo audio/future-design.mp3.';
+        console.warn('Música no disponible:', error);
     }
 }
 
 function toggleSound() {
-    if (!audioCtx) {
+    if (!musicBuffer) {
         initAudio();
         return;
     }
-    soundEnabled = !soundEnabled;
-    const btn = document.getElementById('btn-sound');
     if (soundEnabled) {
-        audioCtx.resume();
-        btn.textContent = 'Desactivar Sonido';
-        btn.classList.add('active');
-        btn.classList.remove('muted');
+        soundEnabled = false;
+        updateMusicButton();
+        setMusicGain(0, 0.55);
     } else {
-        audioCtx.suspend();
-        btn.textContent = 'Activar Sonido';
-        btn.classList.remove('active');
-        btn.classList.add('muted');
+        soundEnabled = true;
+        updateMusicButton();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        startMusicPlayback();
     }
 }
 
-// Ruido blanco / rosa usando buffer
-function createNoiseBuffer() {
-    const bufferSize = audioCtx.sampleRate * 2; // 2 segundos
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-    }
-    return buffer;
-}
-
-function buildAmbientSound() {
-    const noiseBuffer = createNoiseBuffer();
-
-    // Nodo de ruido ambiental (hum muy bajo)
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = noiseBuffer;
-    noise.loop = true;
-
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 250;
-    filter.Q.value = 0.5;
-
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0.08;
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-    noise.start();
-
-    ambientNodes.noise = noise;
-    ambientNodes.filter = filter;
-    ambientNodes.gain = gain;
-
-    // Oscilador de aire muy suave (LFO modulado)
-    const osc = audioCtx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = 60;
-    const oscGain = audioCtx.createGain();
-    oscGain.gain.value = 0.03;
-    osc.connect(oscGain);
-    oscGain.connect(audioCtx.destination);
-    osc.start();
-    ambientNodes.osc = osc;
-    ambientNodes.oscGain = oscGain;
-}
-
-function buildStationSounds() {
-    STATIONS.forEach(st => {
-        const gain = audioCtx.createGain();
-        gain.gain.value = 0; // Inicia en 0, se ajusta por proximidad
-        gain.connect(audioCtx.destination);
-
-        const nodes = { gain };
-
-        switch (st.soundType) {
-            case 'air': // Consultas: hum suave + sweep ocasional
-            {
-                const osc = audioCtx.createOscillator();
-                osc.type = 'sine';
-                osc.frequency.value = 180;
-                const og = audioCtx.createGain();
-                og.gain.value = 0.15;
-                osc.connect(og);
-                og.connect(gain);
-                osc.start();
-                nodes.osc = osc;
-                nodes.oscGain = og;
-
-                // Sweep de "puerta" cada 6 segundos
-                const sweepOsc = audioCtx.createOscillator();
-                sweepOsc.type = 'sawtooth';
-                sweepOsc.frequency.value = 0.16; // ciclo lento
-                const sweepGain = audioCtx.createGain();
-                sweepGain.gain.value = 0;
-                // Modulamos frecuencia de otro oscilador para crear sweep
-                const sweepTone = audioCtx.createOscillator();
-                sweepTone.type = 'sine';
-                sweepTone.frequency.value = 300;
-                const sweepToneGain = audioCtx.createGain();
-                sweepToneGain.gain.value = 0.05;
-                sweepOsc.connect(sweepGain);
-                // Usamos el sweepOsc como LFO para modificar frecuencia del tone
-                // Simple approach: usar setInterval para ramp de frecuencia
-                sweepTone.connect(sweepToneGain);
-                sweepToneGain.connect(gain);
-                sweepTone.start();
-                nodes.sweepTone = sweepTone;
-
-                setInterval(() => {
-                    if (!soundEnabled) return;
-                    const now = audioCtx.currentTime;
-                    sweepTone.frequency.setValueAtTime(200, now);
-                    sweepTone.frequency.exponentialRampToValueAtTime(600, now + 1.5);
-                    sweepTone.frequency.exponentialRampToValueAtTime(200, now + 3);
-                }, 6000);
-                break;
-            }
-            case 'scan': // Digitalización: clicks rápidos + partículas
-            {
-                // Clicks periódicos
-                const clickInterval = setInterval(() => {
-                    if (!soundEnabled) return;
-                    const now = audioCtx.currentTime;
-                    const clickOsc = audioCtx.createOscillator();
-                    clickOsc.type = 'square';
-                    clickOsc.frequency.value = 1200 + Math.random()*800;
-                    const clickGain = audioCtx.createGain();
-                    clickGain.gain.setValueAtTime(0.08, now);
-                    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-                    clickOsc.connect(clickGain);
-                    clickGain.connect(gain);
-                    clickOsc.start(now);
-                    clickOsc.stop(now + 0.05);
-                }, 250 + Math.random()*400);
-                nodes.interval = clickInterval;
-
-                // Ruido de partículas suave
-                const noise = audioCtx.createBufferSource();
-                noise.buffer = createNoiseBuffer();
-                noise.loop = true;
-                const noiseFilter = audioCtx.createBiquadFilter();
-                noiseFilter.type = 'highpass';
-                noiseFilter.frequency.value = 3000;
-                const noiseGain = audioCtx.createGain();
-                noiseGain.gain.value = 0.04;
-                noise.connect(noiseFilter);
-                noiseFilter.connect(noiseGain);
-                noiseGain.connect(gain);
-                noise.start();
-                nodes.noise = noise;
-                break;
-            }
-            case 'cognitive': // Radicación IA: acorde suave + chirps
-            {
-                const freqs = [220, 277, 330]; // A3, C#4, E4
-                freqs.forEach((f, i) => {
-                    const osc = audioCtx.createOscillator();
-                    osc.type = 'triangle';
-                    osc.frequency.value = f;
-                    const og = audioCtx.createGain();
-                    og.gain.value = 0.04;
-                    osc.connect(og);
-                    og.connect(gain);
-                    osc.start();
-                });
-                // Chirps ocasionales
-                setInterval(() => {
-                    if (!soundEnabled) return;
-                    const now = audioCtx.currentTime;
-                    const chirp = audioCtx.createOscillator();
-                    chirp.type = 'sine';
-                    chirp.frequency.setValueAtTime(400, now);
-                    chirp.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
-                    const cg = audioCtx.createGain();
-                    cg.gain.setValueAtTime(0.06, now);
-                    cg.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                    chirp.connect(cg);
-                    cg.connect(gain);
-                    chirp.start(now);
-                    chirp.stop(now + 0.15);
-                }, 3500);
-                break;
-            }
-            case 'map': // Georreferenciación: pings espaciales + vibrato
-            {
-                setInterval(() => {
-                    if (!soundEnabled) return;
-                    const now = audioCtx.currentTime;
-                    const ping = audioCtx.createOscillator();
-                    ping.type = 'sine';
-                    ping.frequency.value = 880;
-                    const pg = audioCtx.createGain();
-                    pg.gain.setValueAtTime(0.1, now);
-                    pg.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-                    ping.connect(pg);
-                    pg.connect(gain);
-                    ping.start(now);
-                    ping.stop(now + 0.4);
-
-                    // Eco
-                    const ping2 = audioCtx.createOscillator();
-                    ping2.type = 'sine';
-                    ping2.frequency.value = 660;
-                    const pg2 = audioCtx.createGain();
-                    pg2.gain.setValueAtTime(0, now + 0.25);
-                    pg2.gain.linearRampToValueAtTime(0.05, now + 0.3);
-                    pg2.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-                    ping2.connect(pg2);
-                    pg2.connect(gain);
-                    ping2.start(now + 0.25);
-                    ping2.stop(now + 0.7);
-                }, 4200);
-                break;
-            }
-            case 'vault': // Custodias: hum grave + latido
-            {
-                const osc = audioCtx.createOscillator();
-                osc.type = 'square';
-                osc.frequency.value = 55; // muy grave
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 120;
-                const og = audioCtx.createGain();
-                og.gain.value = 0.06;
-                osc.connect(filter);
-                filter.connect(og);
-                og.connect(gain);
-                osc.start();
-                nodes.osc = osc;
-
-                // Latido
-                setInterval(() => {
-                    if (!soundEnabled) return;
-                    const now = audioCtx.currentTime;
-                    const beat = audioCtx.createOscillator();
-                    beat.type = 'sine';
-                    beat.frequency.value = 80;
-                    const bg = audioCtx.createGain();
-                    bg.gain.setValueAtTime(0.12, now);
-                    bg.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                    beat.connect(bg);
-                    bg.connect(gain);
-                    beat.start(now);
-                    beat.stop(now + 0.25);
-                }, 1800);
-                break;
-            }
-        }
-
-        stationSounds[st.id] = nodes;
-    });
-}
-
-// Ajusta volúmenes según distancia cámara-estación
-function updateStationSoundVolumes() {
-    if (!audioCtx || !soundEnabled) return;
-    STATIONS.forEach(st => {
-        const nodes = stationSounds[st.id];
-        if (!nodes) return;
-        const dist = camera.position.distanceTo(st.group.position);
-        const maxDist = 22;
-        const minDist = 4;
-        let vol = 1 - (dist - minDist) / (maxDist - minDist);
-        vol = Math.max(0, Math.min(1, vol));
-        // Si hay una estación seleccionada, solo esa suena fuerte
-        if (currentStation && currentStation !== st.id) {
-            vol *= 0.15;
-        }
-        nodes.gain.gain.setTargetAtTime(vol * 0.5, audioCtx.currentTime, 0.3);
-    });
-}
+// La música de fondo reemplaza los antiguos sonidos procedurales por estación.
 
 // ==========================================
 // ANIMACIÓN PRINCIPAL
@@ -3395,12 +3194,6 @@ function animate() {
         const intersects = raycaster.intersectObjects(stationMeshes, false);
         renderer.domElement.style.cursor = intersects.length ? 'pointer' : 'grab';
         hoverDirty = false;
-    }
-
-    // Sonido espacial actualizado a 8 Hz, no en cada render
-    if (time - lastSoundUpdate > 0.12) {
-        updateStationSoundVolumes();
-        lastSoundUpdate = time;
     }
 
     renderer.render(scene, camera);
