@@ -45,7 +45,7 @@ Pensada para compartir pantalla durante una transmisión. Mantiene una composici
 
 Ubica al visitante en un punto fijo, a altura humana, y le permite mirar alrededor moviendo el celular. Si los sensores no están disponibles, la pantalla puede explorarse con gestos táctiles.
 
-Al seleccionar este modo se reproduce una transición audiovisual de 8 segundos, sin sonido y con opción de saltarla. Si el dispositivo prefiere movimiento reducido, la transición se omite y se entra directamente a la experiencia.
+Al seleccionar este modo se reproduce una transición audiovisual de 8 segundos, sin sonido y con opción de saltarla. La transición responde a una acción explícita del usuario; las demás animaciones decorativas respetan la preferencia de movimiento reducido del sistema.
 
 El uso de sensores requiere que el sitio se abra mediante HTTPS y que el usuario autorice el acceso cuando el navegador lo solicite.
 

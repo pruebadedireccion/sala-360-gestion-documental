@@ -1256,7 +1256,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
 <!-- Transición cinematográfica hacia la experiencia 360° -->
 <div id="portal-transition" aria-hidden="true">
-    <video id="portal-transition-video" muted playsinline preload="none" poster="video/tunnel-360-poster.jpg">
+    <video id="portal-transition-video" muted playsinline preload="auto" poster="video/tunnel-360-poster.jpg">
         <source src="video/tunnel-360.mp4" type="video/mp4">
     </video>
     <div class="portal-transition-shade" aria-hidden="true"></div>
@@ -3424,10 +3424,7 @@ function finish360Entry() {
 }
 
 function begin360Entry() {
-    if (REDUCED_MOTION) {
-        startExperience(true);
-        return;
-    }
+    // La transición es una acción explícita del usuario y siempre puede saltarse.
     const overlay = document.getElementById('portal-transition');
     const video = document.getElementById('portal-transition-video');
     portalTransitionActive = true;

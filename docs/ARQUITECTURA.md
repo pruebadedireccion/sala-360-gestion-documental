@@ -126,9 +126,9 @@ Al seleccionar **Entrar en 360°**:
 2. Se reproduce `video/tunnel-360.mp4`, silencioso y de 8 segundos.
 3. La escena 360° y el audio se inicializan detrás de la transición.
 4. El video se desvanece al terminar o cuando el usuario pulsa **Saltar transición**.
-5. Si el navegador prefiere movimiento reducido o el video falla, se entra directamente.
+5. Si el video falla o el usuario lo salta, se entra directamente.
 
-El video está en 1280 × 720, 24 fps, sin pista de audio, con `faststart` para inicio rápido. La imagen `video/tunnel-360-poster.jpg` se usa como respaldo visual.
+La transición es una acción explícita del usuario y siempre ofrece el botón **Saltar transición**. El video está en 1280 × 720, 24 fps, sin pista de audio, con `faststart` para inicio rápido. La imagen `video/tunnel-360-poster.jpg` se usa como respaldo visual.
 
 ### Interfaz
 
