@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10233f">
+<title>Acceso a la experiencia 360°</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100%; }
+body {
+    display: grid;
+    place-items: center;
+    padding: 32px;
+    color: #ffffff;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:
+        radial-gradient(circle at 24% 18%, rgba(55, 207, 255, 0.20), transparent 32%),
+        linear-gradient(145deg, #1b3c58 0%, #10233f 54%, #091729 100%);
+}
+main { width: min(1180px, 100%); }
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    color: #c5d3df;
+    font-size: clamp(0.85rem, 1.4vw, 1rem);
+    letter-spacing: 0.3px;
+}
+.brand::before { content: ''; width: 44px; height: 3px; border-radius: 4px; background: #72ddf5; }
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+    gap: 38px;
+    align-items: center;
+}
+h1 {
+    max-width: 720px;
+    margin-bottom: 18px;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    font-size: clamp(2.4rem, 5.6vw, 5rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -1.5px;
+}
+h1 span { color: #72ddf5; }
+.lead { max-width: 620px; color: #d9e8f2; font-size: clamp(1rem, 1.7vw, 1.25rem); line-height: 1.6; }
+.steps { display: grid; gap: 14px; margin-top: 30px; max-width: 640px; }
+.step { display: flex; align-items: center; gap: 14px; color: #eaf8ff; font-size: clamp(0.92rem, 1.4vw, 1.08rem); }
+.number {
+    display: grid;
+    place-items: center;
+    width: 34px; height: 34px;
+    flex: 0 0 34px;
+    border: 1px solid rgba(114, 221, 245, 0.6);
+    border-radius: 50%;
+    color: #72ddf5;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.qr-card {
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+}
+.qr-card img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.qr-label { margin-top: 15px; color: #263648; text-align: center; font-weight: 600; font-size: 0.95rem; }
+.url {
+    display: block;
+    margin-top: 16px;
+    padding: 12px 14px;
+    overflow-wrap: anywhere;
+    border-radius: 10px;
+    background: #eef4f7;
+    color: #173b56;
+    font-family: Consolas, monospace;
+    font-size: clamp(0.76rem, 1.2vw, 0.92rem);
+    text-align: center;
+    text-decoration: none;
+}
+.note {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    color: #9eb5c7;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+@media (max-width: 780px) {
+    body { padding: 22px; }
+    .layout { grid-template-columns: 1fr; gap: 26px; }
+    h1 { font-size: clamp(2.2rem, 11vw, 3.5rem); }
+    .qr-card { width: min(420px, 100%); margin: 0 auto; }
+    .steps { margin-top: 20px; }
+}
+</style>
+</head>
+<body>
+<main>
+    <div class="brand">Subdirección de Gestión Documental · 2038</div>
+    <div class="layout">
+        <section>
+            <h1>La sala también está en <span>tu celular.</span></h1>
+            <p class="lead">Escanea el código con la cámara de tu teléfono y recorre las cinco estaciones desde un punto de observación 360°.</p>
+            <div class="steps">
+                <div class="step"><span class="number">1</span><span>Apunta la cámara al código QR.</span></div>
+                <div class="step"><span class="number">2</span><span>Pulsa “Entrar en 360°”.</span></div>
+                <div class="step"><span class="number">3</span><span>Autoriza el movimiento y gira el celular para mirar alrededor.</span></div>
+            </div>
+            <p class="note">También puedes abrir el enlace directamente. No requiere instalar aplicaciones. Si el movimiento no está disponible, podrás deslizar la pantalla para explorar.</p>
+        </section>
+        <aside class="qr-card" aria-label="Código QR de acceso">
+            <img src="qr.png" alt="Código QR para abrir la experiencia 360°">
+            <div class="qr-label">Escanea para entrar</div>
+            <a class="url" href="https://pruebadedireccion.github.io/sala-360-gestion-documental/">https://pruebadedireccion.github.io/sala-360-gestion-documental/</a>
+        </aside>
+    </div>
+</main>
+</body>
+</html>
