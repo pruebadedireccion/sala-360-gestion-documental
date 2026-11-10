@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#10233f">
     <meta name="description" content="Experiencia virtual 360° de la Subdirección de Gestión Documental.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2310233f'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%2372ddf5' stroke-width='4'/%3E%3Ctext x='32' y='38' text-anchor='middle' font-family='Arial' font-size='17' font-weight='bold' fill='%23ffffff'%3E360%3C/text%3E%3C/svg%3E">
     <title>Subdirección de Gestión Documental — 2038</title>
     <!-- Three.js desde CDN -->
     <!-- Three.js incluido para que la experiencia funcione sin CDN externo -->
@@ -1038,6 +1039,7 @@ let tourElapsed = 0;
 let is360Mode = false;
 let useDeviceOrientation = false;
 let motionListenerAttached = false;
+let motionRequested = false;
 let orientationReferenceSet = false;
 let orientationDataReceived = false;
 let view360Yaw = 0;
@@ -2465,7 +2467,7 @@ function quaternionFor360View(yaw, pitch, target) {
 
 function update360MotionButton() {
     const button = document.getElementById('btn-360-motion');
-    button.textContent = useDeviceOrientation ? 'Movimiento activo' : 'Usar movimiento';
+    button.textContent = useDeviceOrientation ? 'Movimiento activo' : motionRequested ? 'Esperando movimiento' : 'Usar movimiento';
     button.classList.toggle('active', useDeviceOrientation);
     button.setAttribute('aria-pressed', String(useDeviceOrientation));
     updateUI();
@@ -2504,6 +2506,11 @@ function onDeviceOrientation(event) {
     orientationRaw.multiply(orientationDefault);
     orientationRaw.multiply(orientationScreen.setFromAxisAngle(orientationZee, -screenAngle));
     orientationDataReceived = true;
+    if (motionRequested && !useDeviceOrientation) {
+        useDeviceOrientation = true;
+        orientationReferenceSet = false;
+        update360MotionButton();
+    }
 
     if (!orientationReferenceSet) {
         orientationReference.copy(orientationRaw);
@@ -2529,10 +2536,12 @@ async function requestMotionPermission() {
             window.addEventListener('deviceorientation', onDeviceOrientation, true);
             motionListenerAttached = true;
         }
+        motionRequested = true;
+        useDeviceOrientation = false;
         orientationReferenceSet = false;
-        useDeviceOrientation = true;
-        document.getElementById('btn-360-motion').title = 'Control por movimiento activo; Recentrar ajusta la orientación';
+        document.getElementById('btn-360-motion').title = 'Esperando datos del sensor; también puedes deslizar para explorar';
     } catch (error) {
+        motionRequested = false;
         useDeviceOrientation = false;
         document.getElementById('btn-360-motion').title = 'Movimiento no disponible; usa HTTPS y un celular con giroscopio. Puedes deslizar para explorar.';
     }
@@ -2549,9 +2558,11 @@ function recenter360() {
     target360Yaw = 0;
     target360Pitch = 0.12;
     if (motionListenerAttached && orientationDataReceived) {
+        motionRequested = true;
         useDeviceOrientation = true;
         calibrateOrientation(true);
     } else {
+        motionRequested = false;
         useDeviceOrientation = false;
         quaternionFor360View(0, 0.12, orientationSmooth);
         camera.quaternion.copy(orientationSmooth);
@@ -2564,6 +2575,7 @@ function recenter360() {
 function enter360Mode() {
     if (tourActive) stopTour();
     is360Mode = true;
+    motionRequested = false;
     document.body.classList.add('mode-360');
     coreGroup.visible = false;
     observationGroup.visible = true;
@@ -2586,6 +2598,7 @@ function enter360Mode() {
 function exit360Mode() {
     if (tourActive) stopTour();
     is360Mode = false;
+    motionRequested = false;
     useDeviceOrientation = false;
     document.body.classList.remove('mode-360');
     if (motionListenerAttached) {
@@ -2648,6 +2661,7 @@ function selectStation(id, fromTour = false) {
 
     if (is360Mode) {
         // En 360° solo cambia la orientación: el visitante permanece en el centro
+        motionRequested = false;
         useDeviceOrientation = false;
         target360Yaw = st.angle;
         target360Pitch = 0.15;
@@ -2668,6 +2682,7 @@ function selectStation(id, fromTour = false) {
 function deselectStation() {
     currentStation = null;
     if (is360Mode) {
+        motionRequested = false;
         useDeviceOrientation = false;
         target360Yaw = 0;
         target360Pitch = 0.12;
@@ -2795,7 +2810,8 @@ function setupEvents() {
     document.getElementById('btn-tour-next').addEventListener('click', advanceTour);
     document.getElementById('btn-tour-stop').addEventListener('click', stopTour);
     document.getElementById('btn-360-motion').addEventListener('click', () => {
-        if (useDeviceOrientation) {
+        if (useDeviceOrientation || motionRequested) {
+            motionRequested = false;
             useDeviceOrientation = false;
             update360MotionButton();
         } else {
@@ -2837,7 +2853,8 @@ function onMouseMove(e) {
         const dy = e.clientY - previousMouse.y;
         if (Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y) > 5) dragMoved = true;
         if (is360Mode) {
-            if (useDeviceOrientation) {
+            if (useDeviceOrientation || motionRequested) {
+                motionRequested = false;
                 useDeviceOrientation = false;
                 update360MotionButton();
             }
@@ -2912,7 +2929,8 @@ function onTouchMove(e) {
         const dy = touch.clientY - previousMouse.y;
         if (Math.hypot(touch.clientX - pointerStart.x, touch.clientY - pointerStart.y) > 6) dragMoved = true;
         if (is360Mode) {
-            if (useDeviceOrientation) {
+            if (useDeviceOrientation || motionRequested) {
+                motionRequested = false;
                 useDeviceOrientation = false;
                 update360MotionButton();
             }
@@ -2977,6 +2995,7 @@ function onKeyDown(e) {
     // Flechas para rotar
     const step = 0.05;
     if (is360Mode) {
+        motionRequested = false;
         useDeviceOrientation = false;
         if (e.key === 'ArrowLeft') target360Yaw -= step;
         if (e.key === 'ArrowRight') target360Yaw += step;
