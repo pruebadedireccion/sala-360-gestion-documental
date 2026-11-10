@@ -24,6 +24,7 @@ Una misma persona puede asumir varios roles en un piloto, pero es recomendable s
 
 - Abrir `https://pruebadedireccion.github.io/sala-360-gestion-documental/`.
 - Ejecutar el recorrido guiado completo.
+- Probar la transición de entrada de 8 segundos y el botón **Saltar transición**.
 - Probar la música, el silencio y la reanudación.
 - Abrir el modo 360° en un Android y en un iPhone.
 - Probar el permiso de sensores concedido y rechazado.

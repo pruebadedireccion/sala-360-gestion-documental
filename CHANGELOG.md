@@ -16,6 +16,8 @@ Todos los cambios relevantes de este proyecto se documentan en este archivo.
 - Oficinas con personal estilizado y paneles holográficos.
 - Texturas procedurales para concreto, metal y paneles.
 - Documentación de uso, operación, arquitectura y licencias.
+- Portada cinematográfica con transición de entrada de 8 segundos.
+- Botón para saltar la transición y respaldo visual estático.
 
 ### Cambiado
 

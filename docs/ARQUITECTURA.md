@@ -118,6 +118,18 @@ La música se carga mediante `fetch` y se decodifica con Web Audio API. Esto per
 
 El archivo se sirve desde `audio/future-design.mp3`.
 
+### Transición de entrada 360°
+
+Al seleccionar **Entrar en 360°**:
+
+1. Se activa un overlay por encima de la escena.
+2. Se reproduce `video/tunnel-360.mp4`, silencioso y de 8 segundos.
+3. La escena 360° y el audio se inicializan detrás de la transición.
+4. El video se desvanece al terminar o cuando el usuario pulsa **Saltar transición**.
+5. Si el navegador prefiere movimiento reducido o el video falla, se entra directamente.
+
+El video está en 1280 × 720, 24 fps, sin pista de audio, con `faststart` para inicio rápido. La imagen `video/tunnel-360-poster.jpg` se usa como respaldo visual.
+
 ### Interfaz
 
 La interfaz se construye con HTML y CSS sobre el canvas. Incluye:

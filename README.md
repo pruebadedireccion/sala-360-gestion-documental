@@ -2,7 +2,7 @@
 
 Experiencia virtual 360° sobre el futuro de la gestión documental de la Secretaría de Hacienda Distrital de Bogotá.
 
-![Vista general de la experiencia](docs/preview.png)
+![Portada de acceso a la experiencia 360°](docs/preview-inicio.jpg)
 
 ## Estado del proyecto
 
@@ -30,7 +30,10 @@ Experiencia virtual 360° sobre el futuro de la gestión documental de la Secret
 - Paneles informativos con una frase de impacto por proceso.
 - Oficinas de fondo con personal estilizado y paneles holográficos.
 - Código QR de acceso para transmisiones por Teams.
+- Portada cinematográfica con transición audiovisual de 8 segundos.
 - Interfaz responsiva para escritorio y móvil.
+
+![Vista general de la experiencia](docs/preview.png)
 
 ## Modos de uso
 
@@ -41,6 +44,8 @@ Pensada para compartir pantalla durante una transmisión. Mantiene una composici
 ### Entrar en 360°
 
 Ubica al visitante en un punto fijo, a altura humana, y le permite mirar alrededor moviendo el celular. Si los sensores no están disponibles, la pantalla puede explorarse con gestos táctiles.
+
+Al seleccionar este modo se reproduce una transición audiovisual de 8 segundos, sin sonido y con opción de saltarla. Si el dispositivo prefiere movimiento reducido, la transición se omite y se entra directamente a la experiencia.
 
 El uso de sensores requiere que el sitio se abra mediante HTTPS y que el usuario autorice el acceso cuando el navegador lo solicite.
 
@@ -93,7 +98,11 @@ El uso de sensores requiere que el sitio se abra mediante HTTPS y que el usuario
 ├── qr.svg                  Versión vectorial del QR
 ├── audio/
 │   └── future-design.mp3   Música de fondo
+├── video/
+│   ├── tunnel-360.mp4      Transición de entrada de 8 segundos
+│   └── tunnel-360-poster.jpg  Imagen de respaldo del video
 ├── docs/
+│   ├── preview-inicio.jpg  Imagen de la portada
 │   ├── preview.png         Imagen de vista general
 │   ├── OPERACION.md        Guía de operación del evento
 │   └── ARQUITECTURA.md     Descripción técnica

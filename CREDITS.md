@@ -23,6 +23,18 @@ Antes de publicar una transmisión en YouTube:
 
 Se recomienda tener una pista instrumental de respaldo con licencia CC0 o de dominio público.
 
+## Video de transición
+
+- **Título:** Man, Tunnel, Flying
+- **Autor:** ChristianBodhi
+- **Fuente:** Pixabay
+- **Página original:** https://pixabay.com/videos/man-tunnel-flying-person-dream-203979/
+- **Archivo utilizado:** `video/tunnel-360.mp4`
+- **Imagen de respaldo:** `video/tunnel-360-poster.jpg`
+- **Licencia:** Pixabay Content License
+- **Atribución:** No obligatoria, según la licencia de Pixabay.
+- **Adaptaciones:** recorte de los primeros 8 segundos, reducción a 1280 × 720, 24 fps, eliminación de audio y compresión H.264.
+
 ## Software de terceros
 
 ### Three.js

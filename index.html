@@ -737,6 +737,359 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
             cursor: pointer;
         }
         #start-screen #start-360-btn:hover { background: rgba(114, 221, 245, 0.12); }
+
+        /* Portada cinematográfica */
+        #start-screen {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            overflow: hidden;
+            background: #06111f;
+        }
+        #start-screen::before {
+            content: '';
+            position: absolute;
+            inset: -2%;
+            background:
+                linear-gradient(90deg, rgba(5, 17, 32, 0.98) 0%, rgba(7, 24, 43, 0.88) 47%, rgba(8, 28, 48, 0.30) 100%),
+                url('video/tunnel-360-poster.jpg') center / cover no-repeat;
+            transform: scale(1.03);
+        }
+        #start-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 74% 42%, rgba(114, 221, 245, 0.16), transparent 26%),
+                linear-gradient(180deg, rgba(4, 14, 27, 0.18), rgba(4, 14, 27, 0.52)),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 72px);
+        }
+        .start-layout {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: minmax(0, 760px) minmax(260px, 1fr);
+            align-items: center;
+            gap: clamp(32px, 6vw, 90px);
+            width: min(1500px, 100%);
+            margin: auto;
+            padding: clamp(28px, 5vw, 78px);
+        }
+        .start-content { max-width: 720px; }
+        .start-seal {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 26px;
+            color: #eaf8ff;
+        }
+        .start-seal-number {
+            display: grid;
+            place-items: center;
+            width: 76px;
+            height: 76px;
+            border: 1px solid rgba(114, 221, 245, 0.75);
+            border-radius: 50%;
+            background: rgba(12, 38, 60, 0.58);
+            color: #72ddf5;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: 0 0 30px rgba(55, 207, 255, 0.12);
+        }
+        .start-seal-copy { display: flex; flex-direction: column; gap: 3px; }
+        .start-seal-copy strong { font-size: 0.77rem; letter-spacing: 1.2px; }
+        .start-seal-copy small { color: #b9cdd9; font-size: 0.74rem; line-height: 1.35; }
+        .start-kicker {
+            margin-bottom: 12px !important;
+            padding: 0 !important;
+            color: #72ddf5 !important;
+            font-size: 0.74rem !important;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-align: left !important;
+            text-transform: uppercase;
+        }
+        #start-screen .start-content h1 {
+            margin: 0 0 22px;
+            padding: 0;
+            color: #ffffff;
+            font-size: clamp(2.7rem, 4.5vw, 4.7rem);
+            font-weight: 400;
+            line-height: 0.98;
+            letter-spacing: -1.5px;
+            text-align: left;
+        }
+        #start-screen .start-content h1 span { display: inline-block; color: #72ddf5; }
+        #start-screen .start-lead {
+            max-width: 620px;
+            margin: 0;
+            padding: 0;
+            color: #d3e2eb;
+            font-size: clamp(0.92rem, 1.3vw, 1.08rem);
+            line-height: 1.65;
+            text-align: left;
+        }
+        #start-screen #start-actions {
+            justify-content: flex-start;
+            gap: 12px;
+            margin-top: 32px;
+            padding: 0;
+        }
+        #start-screen #start-360-btn.start-primary,
+        #start-screen #start-btn.start-secondary {
+            min-height: 54px;
+            padding: 14px 23px;
+            border-radius: 13px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: none;
+            cursor: pointer;
+            transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+        #start-screen #start-360-btn.start-primary {
+            border: 1px solid #72ddf5;
+            background: #72ddf5;
+            color: #10233f;
+            box-shadow: 0 14px 34px rgba(55, 207, 255, 0.22);
+        }
+        #start-screen #start-360-btn.start-primary span { margin-left: 9px; font-size: 1.1rem; }
+        #start-screen #start-360-btn.start-primary:hover {
+            background: #a3ebfa;
+            border-color: #a3ebfa;
+            transform: translateY(-2px);
+        }
+        #start-screen #start-btn.start-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.30);
+            background: rgba(10, 30, 50, 0.42);
+            color: #e8f5fb;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        #start-screen #start-btn.start-secondary:hover {
+            border-color: rgba(114, 221, 245, 0.72);
+            background: rgba(19, 52, 77, 0.72);
+            transform: translateY(-2px);
+        }
+        .start-capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        .start-capabilities span {
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 20px;
+            background: rgba(5, 19, 34, 0.34);
+            color: #b8ceda;
+            font-size: 0.69rem;
+        }
+        #start-screen .hint {
+            margin-top: 18px;
+            padding: 0;
+            color: #91a9b8;
+            font-size: 0.73rem;
+            text-align: left;
+        }
+        .start-aside {
+            align-self: center;
+            justify-self: end;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            color: #e7f7fc;
+            text-align: center;
+        }
+        .start-orbit {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: clamp(220px, 23vw, 330px);
+            aspect-ratio: 1;
+        }
+        .start-orbit-ring {
+            position: absolute;
+            inset: 7%;
+            border: 1px solid rgba(114, 221, 245, 0.44);
+            border-radius: 50%;
+            animation: startOrbit 20s linear infinite;
+        }
+        .start-orbit-ring::before {
+            content: '';
+            position: absolute;
+            top: 7%;
+            right: 7%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #72ddf5;
+            box-shadow: 0 0 18px #72ddf5;
+        }
+        .start-orbit-ring-alt {
+            inset: 20%;
+            border-style: dashed;
+            border-color: rgba(255, 255, 255, 0.24);
+            animation-direction: reverse;
+            animation-duration: 28s;
+        }
+        .start-orbit-label {
+            color: #ffffff;
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-size: clamp(2.4rem, 4vw, 4rem);
+            font-weight: 300;
+            letter-spacing: -2px;
+        }
+        .start-aside p {
+            max-width: 280px;
+            padding: 0;
+            margin: 0;
+            color: #e1f2fa;
+            font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+            line-height: 1.45;
+            text-align: center;
+        }
+        .start-aside-meta { color: #87a2b2; font-size: 0.68rem; letter-spacing: 2px; }
+        @keyframes startOrbit { to { transform: rotate(360deg); } }
+
+        /* Transición de entrada 360° */
+        #portal-transition {
+            position: fixed;
+            inset: 0;
+            z-index: 220;
+            overflow: hidden;
+            background: #06111f;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+        #portal-transition.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        #portal-transition.leaving { opacity: 0; pointer-events: none; }
+        #portal-transition video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: saturate(0.62) brightness(0.70) contrast(1.08);
+            transform: scale(1.015);
+        }
+        .portal-transition-shade {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(5, 17, 32, 0.48), rgba(5, 17, 32, 0.06) 60%),
+                linear-gradient(0deg, rgba(4, 14, 27, 0.78), transparent 56%);
+        }
+        .portal-transition-copy {
+            position: absolute;
+            left: clamp(24px, 6vw, 86px);
+            bottom: clamp(55px, 10vh, 108px);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: #ffffff;
+        }
+        .portal-transition-copy > span {
+            color: #72ddf5;
+            font-size: 0.69rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .portal-transition-copy strong {
+            font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+            font-size: clamp(2rem, 4.8vw, 4.5rem);
+            font-weight: 400;
+            letter-spacing: -1px;
+        }
+        .portal-transition-track {
+            width: min(230px, 52vw);
+            height: 2px;
+            margin-top: 9px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.22);
+        }
+        .portal-transition-track i {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #72ddf5;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+        #portal-transition.active .portal-transition-track i { animation: portalProgress 8s linear forwards; }
+        #skip-360-transition {
+            position: absolute;
+            right: 24px;
+            bottom: 24px;
+            z-index: 3;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.36);
+            border-radius: 10px;
+            background: rgba(5, 17, 32, 0.58);
+            color: #ffffff;
+            font-size: 0.76rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        #skip-360-transition:hover { border-color: #72ddf5; background: rgba(20, 56, 80, 0.80); }
+        @keyframes portalProgress { to { transform: scaleX(1); } }
+
+        @media (max-width: 900px) {
+            .start-layout {
+                grid-template-columns: 1fr;
+                align-items: end;
+                padding: 28px 20px 34px;
+            }
+            .start-aside { display: none; }
+            #start-screen::before {
+                background:
+                    linear-gradient(90deg, rgba(5, 17, 32, 0.90), rgba(6, 22, 40, 0.52)),
+                    url('video/tunnel-360-poster.jpg') center / cover no-repeat;
+            }
+            .start-content { max-width: 100%; }
+            .start-seal { margin-bottom: 20px; }
+            .start-seal-number { width: 64px; height: 64px; font-size: 1.4rem; }
+            #start-screen .start-content h1 { font-size: clamp(2.25rem, 10vw, 3.4rem); letter-spacing: -1px; }
+            #start-screen .start-actions {
+                flex-direction: row;
+                justify-content: flex-start;
+            }
+            #start-screen #start-actions { gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+            #start-screen #start-360-btn.start-primary,
+            #start-screen #start-btn.start-secondary {
+                min-height: 48px;
+                padding: 11px 15px;
+                font-size: 0.74rem;
+            }
+            #start-screen .hint { font-size: 0.68rem; line-height: 1.4; }
+            .portal-transition-copy { bottom: 76px; }
+            #skip-360-transition { right: 16px; bottom: 18px; }
+        }
+        @media (max-width: 520px) {
+            .start-layout { padding: 22px 16px 26px; }
+            .start-capabilities { display: none; }
+            .start-kicker { font-size: 0.64rem !important; }
+            #start-screen .start-content h1 { font-size: clamp(2rem, 11vw, 2.8rem); line-height: 1.02; }
+            #start-screen .start-lead { font-size: 0.84rem; line-height: 1.5; }
+            #start-screen #start-actions { flex-direction: column; align-items: stretch; }
+            #start-screen #start-360-btn.start-primary,
+            #start-screen #start-btn.start-secondary { width: 100%; justify-content: center; }
+            #start-screen .hint { margin-top: 14px; }
+            .portal-transition-copy strong { font-size: 1.9rem; }
+            .portal-transition-copy > span { font-size: 0.58rem; }
+            #skip-360-transition { font-size: 0.68rem; padding: 8px 12px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .start-orbit-ring { animation: none; }
+            #portal-transition.active .portal-transition-track i { animation: none; transform: scaleX(1); }
+        }
         #controls-360 {
             position: absolute;
             top: 104px;
@@ -869,13 +1222,50 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
 <!-- Pantalla de inicio -->
 <div id="start-screen">
-    <h1>Subdirección de Gestión Documental<br><span>2038</span></h1>
-    <p>Explora la maqueta virtual del futuro de la gestión documental y acompáñanos a celebrar los 100 años de la Secretaría de Hacienda Distrital de Bogotá.</p>
-    <div id="start-actions">
-        <button id="start-btn">Vista de presentación</button>
-        <button id="start-360-btn">Entrar en 360°</button>
+    <div class="start-layout">
+        <section class="start-content">
+            <div class="start-seal">
+                <span class="start-seal-number">100</span>
+                <span class="start-seal-copy"><strong>AÑOS</strong><small>Secretaría de Hacienda<br>Distrital de Bogotá</small></span>
+            </div>
+            <p class="start-kicker">Experiencia inmersiva 360°</p>
+            <h1>Subdirección de<br>Gestión Documental <span>2038</span></h1>
+            <p class="start-lead">Explora la maqueta virtual del futuro de la gestión documental y acompáñanos a celebrar los 100 años de la Secretaría de Hacienda Distrital de Bogotá.</p>
+            <div id="start-actions">
+                <button id="start-360-btn" class="start-primary">Entrar en 360° <span aria-hidden="true">→</span></button>
+                <button id="start-btn" class="start-secondary">Vista de presentación</button>
+            </div>
+            <div class="start-capabilities" aria-label="Características de la experiencia">
+                <span>Sin instalación</span>
+                <span>Movimiento o pantalla táctil</span>
+                <span>Audio ambiental</span>
+            </div>
+            <div class="hint">En 360° puedes mirar moviendo tu celular o deslizando la pantalla</div>
+        </section>
+        <aside class="start-aside" aria-hidden="true">
+            <div class="start-orbit">
+                <span class="start-orbit-ring"></span>
+                <span class="start-orbit-ring start-orbit-ring-alt"></span>
+                <span class="start-orbit-label">360°</span>
+            </div>
+            <p>Cinco estaciones.<br>Una mirada al futuro.</p>
+            <span class="start-aside-meta">BOGOTÁ · 2038</span>
+        </aside>
     </div>
-    <div class="hint">En 360° puedes mirar moviendo tu celular o deslizando la pantalla</div>
+</div>
+
+<!-- Transición cinematográfica hacia la experiencia 360° -->
+<div id="portal-transition" aria-hidden="true">
+    <video id="portal-transition-video" muted playsinline preload="none" poster="video/tunnel-360-poster.jpg">
+        <source src="video/tunnel-360.mp4" type="video/mp4">
+    </video>
+    <div class="portal-transition-shade" aria-hidden="true"></div>
+    <div class="portal-transition-copy">
+        <span>EXPERIENCIA 360°</span>
+        <strong>Abriendo la sala</strong>
+        <div class="portal-transition-track"><i></i></div>
+    </div>
+    <button id="skip-360-transition" type="button">Saltar transición</button>
 </div>
 
 <!-- Contenedor del canvas 3D -->
@@ -1077,6 +1467,8 @@ let tourActive = false;
 let tourPlaying = false;
 let tourIndex = 0;
 let tourElapsed = 0;
+let portalTransitionActive = false;
+let portalTransitionTimer = null;
 
 // Estado del punto de observación 360° y de los sensores móviles
 let is360Mode = false;
@@ -3014,6 +3406,56 @@ function updateTour(delta) {
     }
 }
 
+function finish360Entry() {
+    if (!portalTransitionActive) return;
+    portalTransitionActive = false;
+    if (portalTransitionTimer) {
+        clearTimeout(portalTransitionTimer);
+        portalTransitionTimer = null;
+    }
+    const overlay = document.getElementById('portal-transition');
+    const video = document.getElementById('portal-transition-video');
+    video.pause();
+    overlay.classList.add('leaving');
+    setTimeout(() => {
+        overlay.classList.remove('active', 'leaving');
+        overlay.setAttribute('aria-hidden', 'true');
+    }, 720);
+}
+
+function begin360Entry() {
+    if (REDUCED_MOTION) {
+        startExperience(true);
+        return;
+    }
+    const overlay = document.getElementById('portal-transition');
+    const video = document.getElementById('portal-transition-video');
+    portalTransitionActive = true;
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    try {
+        video.currentTime = 0;
+        video.preload = 'auto';
+        video.load();
+        const playback = video.play();
+        if (playback && typeof playback.catch === 'function') {
+            playback.catch(() => {
+                if (portalTransitionTimer) clearTimeout(portalTransitionTimer);
+                portalTransitionTimer = setTimeout(finish360Entry, 1600);
+            });
+        }
+    } catch (error) {
+        if (portalTransitionTimer) clearTimeout(portalTransitionTimer);
+        portalTransitionTimer = setTimeout(finish360Entry, 1600);
+    }
+    video.addEventListener('ended', finish360Entry, { once: true });
+    portalTransitionTimer = setTimeout(finish360Entry, 9000);
+
+    // La experiencia se inicializa detrás del video para que la transición no agregue espera.
+    startExperience(true);
+}
+
 function startExperience(enable360) {
     document.getElementById('start-screen').classList.add('hidden');
     initAudio();
@@ -3067,7 +3509,8 @@ function setupEvents() {
 
     // Dos formas de entrar: presentación para Teams o punto fijo 360°
     document.getElementById('start-btn').addEventListener('click', () => startExperience(false));
-    document.getElementById('start-360-btn').addEventListener('click', () => startExperience(true));
+    document.getElementById('start-360-btn').addEventListener('click', begin360Entry);
+    document.getElementById('skip-360-transition').addEventListener('click', finish360Entry);
 
     updateTourUI();
 }
@@ -3210,6 +3653,11 @@ function onTouchEnd(e) {
 // Teclado
 function onKeyDown(e) {
     const key = e.key.toLowerCase();
+    if (portalTransitionActive && (e.key === 'Escape' || e.key === ' ')) {
+        e.preventDefault();
+        finish360Entry();
+        return;
+    }
     if (e.key === 'Escape') {
         if (isImmersive) toggleImmersive();
         if (is360Mode) exit360Mode();
